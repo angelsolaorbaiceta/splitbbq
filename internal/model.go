@@ -10,12 +10,24 @@ import (
 )
 
 type Spending struct {
-	spenderName string
-	amountCents int
+	SpenderName string
+	AmountCents int
 }
 
 func (s Spending) String() string {
-	return fmt.Sprintf("%s paga %0.2f€", s.spenderName, float64(s.amountCents)/100)
+	return fmt.Sprintf("%s paga %0.2f€", s.SpenderName, float64(s.AmountCents)/100)
+}
+
+type Payment struct {
+	PayerName, PayeeName string
+	AmountCents          int
+}
+
+func (p Payment) String() string {
+	return fmt.Sprintf(
+		"%s paga a %s %0.2f€",
+		p.PayerName, p.PayeeName, float64(p.AmountCents)/100,
+	)
 }
 
 func ParseInput(r io.Reader) []Spending {

@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	for i, spending := range internal.ParseInput(os.Stdin) {
-		fmt.Printf("%d - %s\n", i+1, spending)
+	spendings := internal.ParseInput(os.Stdin)
+	for _, payment := range internal.SettleDown(spendings) {
+		fmt.Println(payment)
 	}
 }
