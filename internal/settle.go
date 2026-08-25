@@ -7,16 +7,16 @@ type balance struct {
 	amountCents int
 }
 
-func SettleDown(spendings []Spending) []Payment {
-	debtors, creditors := splitDebtorsFromCreditors(spendings)
+func SettleDown(spendings []Spending) ([]Payment, int) {
+	shareCents, remainderCents := calculateShareAndRemainder(spendings)
+	debtors, creditors := splitDebtorsFromCreditors(spendings, shareCents)
 
-	return calculatePayments(debtors, creditors)
+	return calculatePayments(debtors, creditors, remainderCents), remainderCents
 }
 
-func splitDebtorsFromCreditors(spendings []Spending) ([]balance, []balance) {
+func splitDebtorsFromCreditors(spendings []Spending, shareCents int) ([]balance, []balance) {
 	var (
 		debtors, creditors []balance
-		shareCents, _      = calculateShareAndRemainder(spendings)
 	)
 
 	for _, spending := range spendings {
@@ -35,7 +35,7 @@ func splitDebtorsFromCreditors(spendings []Spending) ([]balance, []balance) {
 	)
 	sort.Slice(
 		creditors,
-		func(i, j int) bool { return creditors[i].amountCents > debtors[j].amountCents },
+		func(i, j int) bool { return creditors[i].amountCents > creditors[j].amountCents },
 	)
 
 	return debtors, creditors
@@ -57,15 +57,15 @@ func calculateShareAndRemainder(spendings []Spending) (int, int) {
 	return share, remainder
 }
 
-func calculatePayments(debtors, creditors []balance) []Payment {
+func calculatePayments(debtors, creditors []balance, remainderCents int) []Payment {
 	var (
 		payments = make([]Payment, 0)
 		i, j     = 0, 0
 	)
 
 	for i < len(debtors) && j < len(creditors) {
-		d := debtors[i]
-		c := creditors[j]
+		d := &debtors[i]
+		c := &creditors[j]
 
 		transfer := min(d.amountCents, c.amountCents)
 		payments = append(payments, Payment{
@@ -77,10 +77,10 @@ func calculatePayments(debtors, creditors []balance) []Payment {
 		d.amountCents -= transfer
 		c.amountCents -= transfer
 
-		if d.amountCents == 0 {
+		if intCloseToZero(d.amountCents, remainderCents) {
 			i++
 		}
-		if c.amountCents == 0 {
+		if intCloseToZero(c.amountCents, remainderCents) {
 			j++
 		}
 	}

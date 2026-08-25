@@ -9,7 +9,12 @@ import (
 
 func main() {
 	spendings := internal.ParseInput(os.Stdin)
-	for _, payment := range internal.SettleDown(spendings) {
+	payments, remainderCents := internal.SettleDown(spendings)
+
+	fmt.Println("---------- Pagos ----------")
+	for _, payment := range payments {
 		fmt.Println(payment)
 	}
+	fmt.Println("---------------------------")
+	fmt.Printf("Céntimos extra: %d\n", remainderCents)
 }
